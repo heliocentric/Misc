@@ -1,0 +1,17 @@
+#!/bin/sh
+
+BRANCH="${1}"
+shift
+brancher() {
+	IFS="
+"
+	for branchname in $(git branch | grep feature/ | grep "${BRANCH}")
+	do
+		targetbranch="$(echo "${branchname}" | awk '{print $1}')"
+		sourcebranch="${1}"
+		git checkout -f "${targetbranch}"
+		git merge "${sourcebranch}"
+
+	done
+}
+brancher "${BRANCH}"
