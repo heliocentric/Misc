@@ -124,6 +124,9 @@ cmain (unsigned long magic, unsigned long addr)
                 (unsigned) mmap->length_low,
                 (unsigned) mmap->type);
     }
+   printf(" ");
+   printf(" ");
+   printf("Multiboot example booted successfully");
 }
 /* Clear the screen and initialize VIDEO, XPOS and YPOS. */
 static void
