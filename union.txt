@@ -1,0 +1,118 @@
+
+Helio/union
+
+From Bsdtips
+
+Jump to: navigation, search
+A union is a merging of two namespaces (two directories), into one. For example, merging /usr/local/bin 
+with /usr/bin. These can have some uses in livecds and network installs. What most people don't know, is 
+that FreeBSD has two different ways of doing unions. One of which /is/ supported on all versions.
+
+Contents
+
+1 Union types
+1.1 unionfs
+1.2 union mount option
+2 Examples of the differences
+2.1 -o union
+2.2 unionfs
+Union types
+
+unionfs
+
+The first is an old (around 4.4BSD) implementation, using the 'stackable filesystem framework'.
+
+This type is the more complex of the two, it uses copy on write and shadow directories to make the 
+union, leading to situations to where you can do, for example:
+
+mount -t cd9660 -o ro /dev/cd0 /usr/
+mount -t tmpfs tmpfs /tmp
+mount -t unionfs /tmp /usr
+Any writing (or file creation) to /usr will appear in /tmp, and is most often used for livecds. The 
+problem with this approach is that it's notoriously unstable. Until 7-current unionfs never worked 
+without causing panics, and even there it's still not recommended. It also breaks fundamentally how 
+vnode lookups work, and furthers the naive assumption users make, that a directory and it's contents are 
+somehow related.
+
+union mount option
+
+Normally, when you mount something onto a mount point, any files and directories on the lower layer 
+'disappear'. By adding the -o union option to mount, if you attempt to open a file that doesn't exist on 
+the mounted volume, the kernel checks the lower layers if they exist there.
+
+Directories are not recursed, so if there is a directory in a union, all writes to files in that 
+directory go to the first filesystem to have that directory looking down. Also, if there are files in a 
+directory from a lower layer, they are not visible.
+
+This method is usable to enforce a strict hierarchy, but flatten it logically, a'la plan 9 mounts, for 
+example:
+
+mount -t nullfs -o noatime,union,ro /i386/bin /bin
+mount -t nullfs -o noatime,union,ro /nfsroot/bin /bin
+mount -t nullfs -o noatime,union,ro /usr/bin /bin
+mount -o noatime,union,ro /dev/$(mdconfig -af /programs/blah) /bin
+It has the added benefit that it is significantly more stable then unionfs, and leads to less 
+ambiguities, at the expense of less flexibility. Also, since it is a mount option, it can be used 
+directly on any fs type, as in the example using mdconfig.
+
+Examples of the differences
+
+-o union
+
+First, let's look at -o union. We'll mount /tmp over /usr:
+
+mount -o union -t nullfs /tmp/ /usr/
+now, we'll create a file in /usr:
+
+touch /usr/blah
+and it'll show up in /tmp:
+
+> ls -l /tmp/blah
+-rw-r--r--  1 helio  wheel  0 Oct 11 23:53 /tmp/blah
+now, we'll create a file in /usr/bin:
+
+touch /usr/bin/blah
+and it won't show up in /tmp:
+
+> ls /tmp/bin/blah
+ls: /tmp/bin/blah: No such file or directory
+and, we'll modify /usr/bin/clear:
+
+#exec tput clear
+and unmount the nullfs:
+
+umount /usr
+now, a cat of /usr/bin/clear will show:
+
+#exec tput clear
+unionfs
+
+We'll mount /tmp over /usr:
+
+mount -t unionfs /tmp/ /usr/
+now, we'll create a file in /usr:
+
+touch /usr/blah
+and it'll show up in /tmp:
+
+> ls -l /tmp/blah
+-rw-r--r--  1 helio  wheel  0 Oct 11 23:53 /tmp/blah
+now, we'll create a file in /usr/bin:
+
+touch /usr/bin/blah
+and it will show up in /tmp:
+
+> ls /tmp/bin/blah
+/tmp/bin/blah
+and, we'll modify /usr/bin/clear:
+
+#exec tput clear
+and unmount the nullfs:
+
+umount /usr
+now, a cat of /usr/bin/clear will show:
+
+exec tput clear
+and a cat of /tmp/bin/clear will show:
+
+#exec tput clear
