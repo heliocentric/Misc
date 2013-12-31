@@ -5,8 +5,9 @@
 \newcommand{\tut}[1] {the {\bf #1} tutorial}
 \newcommand{\acc}[1] {{\it #1}}
 \newcommand{\conf}[1] {{\newline #1}}
+\newcommand{\cmd}[1] {{\newline \# #1}}
 \newcommand{\carp}{{\bf CARP}}
-\newcommand{\fullcarp}{\uline{C}ommon \uline{A}ddress \uline{R}edundancy \uline{P}rotocol }
+\newcommand{\fullcarp}{\uline{{\bf C}}ommon \uline{{\bf A}}ddress \uline{{\bf R}}edundancy \uline{{\bf P}}rotocol }
 \begin{document}
 
 \title{Carp Tutorial}
