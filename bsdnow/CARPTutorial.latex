@@ -33,7 +33,7 @@ by CARP.
 \section{Setup}
 For the following tutorial we assume you have a router set up the same way as in \tut{The ultimate OpenBSD router}. 
 There are some differences you'll need to be aware of:
-\begin{enumerate}
+\begin{description}
 
 \item[/etc/dhcpd.conf] \hfill \\
   Ensure that you change the range of the dhcpd server to exclude more then a single ip address as configured in the 
@@ -52,7 +52,7 @@ tutorial. A good idea is to start the range at 100, like so:
   \conf{\}}
   \conf{\}}
 
-\end{enumerate}
+\end{description}
 
 
 \section{Getting Started}
