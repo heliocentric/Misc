@@ -2,6 +2,7 @@
 \usepackage{graphicx}
 \usepackage[normalem]{ulem}
 \newcommand{\tut}[1] {the {\bf #1} tutorial}
+\newcommand{\acc}[1] {{\it #1}}
 \newcommand{\conf}[1] {{\newline #1}}
 \newcommand{\carp}{{\bf CARP}}
 \newcommand{\fullcarp}{\uline{C}ommon \uline{A}ddress \uline{R}edundancy \uline{P}rotocol }
@@ -13,9 +14,9 @@
 \maketitle
 
 \section{Introduction}
-Let.s paint a picture, shall we? Suppose you have a company where their entire business flow relies on having 
-internet access 24/7 (or, close to it). Let.s say this company has invested in a .cloud accounting. package to do all 
-of their work orders, purchase orders, invoices, and payroll. No computer in the entire company has a copy of this 
+Lets paint a picture, shall we? Suppose you have a company where their entire business flow relies on having 
+internet access 24/7 (or, close to it). Lets say this company has invested in a \acc{cloud accounting} package to do 
+all of their work orders, purchase orders, invoices, and payroll. No computer in the entire company has a copy of this 
 data, it is all stored in some Itanium servers in a datacenter somewhere. The company is already paying for a DSL 
 line in addition to their high speed cable internet, and you want some way to ensure that when the high speed cable 
 line goes down, they can still have access to the lifeblood of their business via the low speed DSL line. The 
@@ -54,6 +55,5 @@ tutorial. A good idea is to start the range at 100, like so:
 
 
 \section{Getting Started}
-Write your conclusion here.
-
+The first thing we need to do is
 \end{document}
