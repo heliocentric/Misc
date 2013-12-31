@@ -7,6 +7,7 @@
 \newcommand{\tuturl}[1] {http://bsdnow.tv/tutorials/#1}
 \newcommand{\tab}{{\hspace*{2em}}}
 \newcommand{\acc}[1] {{\it #1}}
+\newcommand{\stdout}[1]{{\textgreater #1}}
 \newcommand{\conf}[1] {{\newline #1}}
 \newcommand{\cmd}[1] {{\newline \$ #1}}
 \newcommand{\cmdr}[1] {{\newline \# #1}}
@@ -51,5 +52,8 @@ tutorial. A good idea is to start the range at 100, like so:
 
 
 \section{Getting Started}
-The first thing we need to do is change the configuration of our internal network. When you set up carp, the first thing you have to remember is that you set the ip address of the \acc{real} interface  
+The first thing we need to do is change the configuration of our internal network. When you set up carp, the first thing you have to remember is that you set the ip address of the \acc{real} interface to be the private ip address of each router, so for example we set the Cable router to be 192.168.1.20:
+\cmdr{echo "inet 172.16.1.1 255.255.255.0 172.16.1.255" \stdout{/etc/hostname.vether0}}
+\cmdr{}
+
 \end{document}
