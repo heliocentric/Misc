@@ -1,0 +1,5 @@
+\@titleaux{Carp Tutorial}
+\@@addtocsec{htoc}{sec1}{0}{\@print{1}\quad{}Introduction{}}
+\@@addtocsec{htoc}{sec2}{0}{\@print{2}\quad{}Definition{}}
+\@@addtocsec{htoc}{sec3}{0}{\@print{3}\quad{}Setup{}}
+\@@addtocsec{htoc}{sec4}{0}{\@print{4}\quad{}Getting Started{}}
