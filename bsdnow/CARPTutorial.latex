@@ -1,11 +1,19 @@
 \documentclass{article}
+\usepackage{enumerate}
 \usepackage{graphicx}
 \usepackage[normalem]{ulem}
-\newcommand{\tut}[1] {the {\bf #1} tutorial}
+\newcommand{\tut}[1]{{\bf \tutname{#1}} (\tuturl{#1})}
+\newcommand{\tutname}[1]{}
+\newcommand{\tuturl}[1] {http://bsdnow.tv/tutorials/#1}
+\newcommand{\tab}{{\hspace*{2em}}}
 \newcommand{\acc}[1] {{\it #1}}
+\newcommand{\stdout}[1]{{\textgreater #1}}
 \newcommand{\conf}[1] {{\newline #1}}
+\newcommand{\cmd}[1] {{\newline \$ #1}}
+\newcommand{\cmdr}[1] {{\newline \# #1}}
+\newcommand{\cmdo}[1] {{\newline #1}}
 \newcommand{\carp}{{\bf CARP}}
-\newcommand{\fullcarp}{\uline{C}ommon \uline{A}ddress \uline{R}edundancy \uline{P}rotocol }
+\newcommand{\fullcarp}{\uline{{\bf C}}ommon \uline{{\bf A}}ddress \uline{{\bf R}}edundancy \uline{{\bf P}}rotocol }
 \begin{document}
 
 \title{Carp Tutorial}
@@ -14,46 +22,48 @@
 \maketitle
 
 \section{Introduction}
-Lets paint a picture, shall we? Suppose you have a company where their entire business flow relies on having 
-internet access 24/7 (or, close to it). Lets say this company has invested in a \acc{cloud accounting} package to do 
-all of their work orders, purchase orders, invoices, and payroll. No computer in the entire company has a copy of this 
-data, it is all stored in some Itanium servers in a datacenter somewhere. The company is already paying for a DSL 
-line in addition to their high speed cable internet, and you want some way to ensure that when the high speed cable 
-line goes down, they can still have access to the lifeblood of their business via the low speed DSL line. The 
-solution? \carp{}.
+Lets paint a picture, shall we? Suppose you have a company where their entire business flow relies on having internet access 24/7 (or, close to it). Lets say this company has invested in a \acc{cloud accounting} package to do all of their work orders, purchase orders, invoices, and payroll. No computer in the entire company has a copy of this data, it is all stored in some Itanium servers in a datacenter somewhere. The company is already paying for a DSL line in addition to their high speed cable internet, and you want some way to ensure that when the high speed cable line goes down, they can still have access to the lifeblood of their business via the low speed DSL line. The solution? \carp{}.
 
 \section{Definition}
-\carp{} stands for \fullcarp{}. Carp is basically a way of providing failover on one ip address, between multiple 
-hosts. When the primary carp interface for that ip address goes down, for whatever reason, the second carp interface 
-will take over for that ip address, allowing direct failover. Depending upon how your system is set up, this can be 
-either seamless. Note that each computer using carp will also need it's own ip address, in addition to the one used 
-by CARP.
+\carp{} stands for \fullcarp{}. Carp is basically a way of providing failover on one ip address, between multiple hosts. When the primary carp interface for that ip address goes down, for whatever reason, the second carp interface will take over for that ip address, allowing direct failover. Depending upon how your system is set up, this can be seamless. Note that each computer using carp will also need it's own ip address, in addition to the one used by \carp.
 
 \section{Setup}
-For the following tutorial we assume you have a router set up the same way as in \tut{The ultimate OpenBSD router}. 
-There are some differences you'll need to be aware of:
-\begin{list_type}
+For the following tutorial we assume you have a router set up the same way as in \tut{openbsd-router}. There are some differences you'll need to be aware of:
+\begin{description}
 
 \item[/etc/dhcpd.conf] \hfill \\
   Ensure that you change the range of the dhcpd server to exclude more then a single ip address as configured in the 
 tutorial. A good idea is to start the range at 100, like so:
   \conf{option domain-name-servers 192.168.1.1, 208.67.222.220;}
   \conf{subnet 192.168.1.0 netmask 255.255.255.0 \{}
-  \conf{option routers 192.168.1.1;}
-  \conf{range 192.168.1.100 192.168.1.254;}
-  \conf{host meimei \{}
-  \conf{fixed-address 192.168.1.2;}
-  \conf{hardware ethernet 00:00:00:00:00:00;}
-  \conf{\}}
-  \conf{host suigintou \{}
-  \conf{fixed-address 192.168.1.3;}
-  \conf{hardware ethernet 11:11:11:11:11:11;}
-  \conf{\}}
+  \conf{\tab option routers 192.168.1.1;}
+  \conf{\tab range 192.168.1.100 192.168.1.254;}
+  \conf{\tab host meimei \{}
+  \conf{\tab \tab fixed-address 192.168.1.2;}
+  \conf{\tab \tab hardware ethernet 00:00:00:00:00:00;}
+  \conf{\tab \}}
+  \conf{\tab host suigintou \{}
+  \conf{\tab \tab fixed-address 192.168.1.3;}
+  \conf{\tab \tab hardware ethernet 11:11:11:11:11:11;}
+  \conf{\tab\}}
   \conf{\}}
 
-\end{list_type}
+\end{description}
 
 
-\section{Getting Started}
-The first thing we need to do is
+\section{Basic \carp}
+The first thing we need to do is change the configuration of our internal network. When you set up carp, the first thing you have to remember is that you set the ip address of the \acc{real} interface to be the private ip address of each router, so for example we set the Cable router to be 192.168.1.20:
+\cmdr{echo "inet 192.168.1.20 255.255.255.0 192.168.1.255" \stdout{/etc/hostname.vether0}}
+\cmdr{}
+On the DSL router, we'll set the ip address to 192.168.1.21:
+\cmdr{echo "inet 192.168.1.21 255.255.255.0 192.168.1.255" \stdout{/etc/hostname.vether0}}
+\cmdr{}
+
+Next, we'll want to create the carp interface on the Cable router. This link is faster then our DSL line, so we'll want to make sure it's used in preference to the other network interfaces. This is determined by changing the 'advskew'. In general, the lower the number, the more preferred a host will be. So we will choose an advskew of 0, and 10 for our DSL line. 
+
+Since this is our first CARP interface, we'll use vhid 1. Remember that vhid's are network wide, so if you set up more then one carp interface, you need to make sure you don't use the same id numbers! We'll set the advbase to 1, which means that carp will announce it's existence every second. We will also add the carpdev option, which will specify which network interface we want carp to run on, which is vether0, our internal interface.
+\cmdr{echo "vhid 1 carpdev vether0 advbase 1 advskew 0 192.168.1.1 netmask 255.255.255.0" \stdout{/etc/hostname.carp0}}
+
+On the DSL router, we set it up almost the same way, except we will change advskew to 10
+\cmdr{echo "vhid 1 carpdev vether0 advbase 1 advskew 10 192.168.1.1 netmask 255.255.255.0" \stdout{/etc/hostname.carp0}}
 \end{document}
