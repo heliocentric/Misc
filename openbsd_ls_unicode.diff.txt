@@ -1,0 +1,12 @@
+--- ls.c.orig   2014-03-30 20:56:06.900235000 -0400
++++ ls.c        2014-03-30 20:56:24.336235000 -0400
+@@ -219,6 +219,9 @@
+                case 'q':
+                        f_nonprint = 1;
+                        break;
++               case 'Q':
++                       f_nonprint = 0;
++                       break;
+                case 'r':
+                        f_reversesort = 1;
+                        break;
